@@ -209,76 +209,6 @@ BOOL CSPAProjectDoc::ExcuteUserAction(CPoint p, UINT nFlags)
 		pClick = p; 
 		isClick = true; 
 		bRet = ExecuteZoom(p, nFlags);
-		//node_Clicked = getNodeContainPoint(p); 
-		//if (node_Clicked != nullptr && node_Clicked->id < graph.v)
-		//{
-		//	CMainFrame* main = getMainFrame();
-		//	main->m_wndProperties.addNodeProp(node_Clicked->getId(), node_Clicked->getId());
-		//	if (count == 2)
-		//	{
-		//		count = 0;
-		//		deleteEdge(src, tar, edge_1, edge_2);
-		//		edge_1.first = nullptr;
-		//		edge_1.second = nullptr;
-		//		edge_2.first = nullptr;
-		//		edge_2.second = nullptr;
-		//	}
-		//	if (count == 0)
-		//	{
-		//		src = node_Clicked;
-		//		tar = nullptr;
-		//		isDraw = false; 
-		//	}
-		//	if (count == 1)
-		//	{
-		//		tar = node_Clicked;
-		//		isDraw = true;
-		//	}
-		//	count++;
-		//}
-		//else
-		//{
-		//	n_e result = checkOnEdge(p);
-		//	if (result.node != nullptr && result.node_1 != nullptr && result.node_2 != nullptr && result.id >= 0)
-		//	{
-		//		CMainFrame* main = getMainFrame();
-		//		main->m_wndProperties.addEdgeProp(result.id, result.id); 
-		//		if (count == 2)
-		//		{
-		//			count = 0;
-		//			deleteEdge(src, tar, edge_1, edge_2);
-		//			edge_1.first = nullptr;
-		//			edge_1.second = nullptr;
-		//			edge_2.first = nullptr;
-		//			edge_2.second = nullptr;
-		//		}
-		//		if (count == 0)
-		//		{
-		//			int id = graph.getMaxNodeId();
-		//			result.node->id = id + 1; 
-		//			src = result.node; 
-		//			addNodeToEdge(src, result.node_1, result.node_2); 
-		//			edge_1 = std::make_pair(result.node_1, result.node_2);
-		//			tar = nullptr; 
-		//			isDraw = false; 
-		//		}
-
-		//		if (count == 1)
-		//		{
-		//			int id = graph.getMaxNodeId();
- 	//				result.node->id = id + 1; 
-		//			tar = result.node; 
-		//			addNodeToEdge(tar, result.node_1, result.node_2);
-		//			edge_2 = std::make_pair(result.node_1, result.node_2); 
-		//			if (edge_1 == edge_2)
-		//			{
-		//				graph.addAdjacentNode(src, tar); 
-		//			}
-		//			isDraw = true;
-		//		}
-		//		count++; 
-		//	}
-		//}
 	}
 		break;
 	case SELECTION_ACTIONS:
@@ -369,11 +299,11 @@ void CSPAProjectDoc::Draw()
 		Max[0] = rcView.right;
 		Min[1] = rcView.top;
 		Max[1] = rcView.bottom;
+
 		//draw edge
 		if (m_eRTData != NULL)
 		{
 			Long::Edge* edge; 
-			MapEngine::GEPoint2D vp; 
 			RTree<Long::Edge*, double, 2>::Iterator it_e(Min, Max); 
 			m_eRTData->GetFirst(it_e);
 			while (!it_e.IsNull())
@@ -400,7 +330,7 @@ void CSPAProjectDoc::Draw()
 			m_pRTData->GetFirst(it);
 			while (!it.IsNull())
 			{
-				node = *it;
+				node = *it; 
 				pTransform->RP2VP(node->lat, node->lon, vp);
 				drawNode(vp.x, vp.y, pDC, pTransform, &redPen);
 				CString num;
@@ -410,35 +340,37 @@ void CSPAProjectDoc::Draw()
 			}
 		}
 		onClick(pClick,pTransform,pDC); 
-		//Find shorted path
-		//if (isDraw)
-		//{
-		//	if (src != nullptr && tar != nullptr)
-		//	{
-		//		int idSrc = src->getId();
-		//		int idTar = tar->getId();
-		//		Long::Dijkstra_priority_queue Dpq;
-		//		Dpq.shortestPath(graph, idSrc, idTar);
-		//		int* a = Dpq.getPath();
-		//		printPath(a, idTar, idTar, pDC, &greenPen, pTransform);
-		//		delete[] a;
-		//	}
-		//}
+		//Draw src_Node
+		MapEngine::GEPoint2D vp;
+		if (src_Node.isNode())
+		{
+			pTransform->RP2VP(src_Node.lat, src_Node.lon, vp); 
+			drawNode(vp.x, vp.y, pDC, pTransform, &greenPen); 
+		}
+		if (tar_Node.isNode())
+		{
+			pTransform->RP2VP(tar_Node.lat, tar_Node.lon, vp); 
+			drawNode(vp.x, vp.y, pDC, pTransform, &greenPen);
+		}
 
-		////Draw node clicked 
-		//if (src != nullptr)
+		//Find shorted_path
+		//if (src_Node.isNode() && tar_Node.isNode())
 		//{
-		//	MapEngine::GEPoint2D p_src(src->lat, src->lon);
-		//	MapEngine::GEPoint2D v_p_src;
-		//	pTransform->RP2VP(p_src, v_p_src);
-		//	drawNode(v_p_src.x, v_p_src.y, pDC, pTransform, &blackPen);
-		//}
-		//if (tar != nullptr)
-		//{
-		//	MapEngine::GEPoint2D p_tar(tar->lat, tar->lon); 
-		//	MapEngine::GEPoint2D v_p_tar; 
-		//	pTransform->RP2VP(p_tar, v_p_tar); 
-		//	drawNode(v_p_tar.x, v_p_tar.y, pDC, pTransform, &blackPen); 
+		//	if (src_Node.id != old_Src_Id && src_Node.id != old_Tar_Id)
+		//	{
+		//		//Dijkstra
+		//		Long::Dijkstra_priority_queue Dpq;
+		//		Dpq.shortestPath(graph, src_Node.id, tar_Node.id);
+		//		path = Dpq.getPath();
+		//		printPath(path, tar_Node.id, tar_Node.id, pDC, &greenPen, pTransform);
+		//		old_Src_Id = src_Node.id; 
+		//		old_Tar_Id = tar_Node.id; 
+		//	}
+		//	else
+		//	{
+		//		//Draw Path
+		//		printPath(path, tar_Node.id, tar_Node.id, pDC, &greenPen, pTransform); 
+		//	}
 		//}
 		//pCatalog->Draw(pDC);
 	}
@@ -451,6 +383,7 @@ BOOL CSPAProjectDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		return FALSE;
 		*/
 	//ClearData(); 
+	init(); 
 	m_strDatabaseFile = lpszPathName;
 
 	if (m_pExtents != NULL)
@@ -501,6 +434,7 @@ void CSPAProjectDoc::readGraph(LPCTSTR m_strDatabaseFile)
 	double latMax = -181; 
 	double lonMin = DBL_MAX; 
 	double lonMax = -181; 
+	int maxID = -1; 
 	double Min[2]; 
 	double Max[2]; 
 	Long::Node* node; 
@@ -516,7 +450,7 @@ void CSPAProjectDoc::readGraph(LPCTSTR m_strDatabaseFile)
 		if (lat < latMin){latMin = lat;}
 		if (lon > lonMax){lonMax = lon;}
 		if (lon < lonMin){lonMin = lon;}
-		//Long::Node* node = new Long::Node(id, lon, lat);
+		maxID = max(maxID, id); 
 		node = new Long::Node(id, lon, lat); 
 		Min[0] = Max[0] = node->lat; 
 		Min[1] = Max[1] = node->lon; 
@@ -533,6 +467,7 @@ void CSPAProjectDoc::readGraph(LPCTSTR m_strDatabaseFile)
 	graph.bottom = lonMax; 
 	graph.left = latMin; 
 	graph.right = latMax; 
+	graph.max_ID = maxID; 
 
 	//read edges
 	Long::Edge* edge; 
@@ -546,7 +481,6 @@ void CSPAProjectDoc::readGraph(LPCTSTR m_strDatabaseFile)
 		std::istringstream in(line);
 		in >> tmp;
 		int node;
-		//Long::Edge* edge = new Long::Edge();
 		edge = new Long::Edge(); 
 		edge->id = id; 
 		while (in)
@@ -693,18 +627,23 @@ void CSPAProjectDoc::ClearData()
 		delete m_eRTData; 
 		m_eRTData = NULL; 
 	}
-	//delete edge 
+	//delete node 
 	for (auto p : graph.Nodes)
 	{
 		delete p; 
 	}
 	graph.Nodes.clear(); 
-	//delete node
+	//delete edge
 	for (auto p : graph.Edges)
 	{
 		delete p; 
 	}
 	graph.Edges.clear(); 
+	//delete path
+	if (path != NULL)
+	{
+		delete[]path;
+	}
 }
 
 void CSPAProjectDoc::onClick(CPoint p, GETransform2D* pTransform, CDC* pDC)
@@ -714,6 +653,7 @@ void CSPAProjectDoc::onClick(CPoint p, GETransform2D* pTransform, CDC* pDC)
 		CPen greenPen(PS_SOLID, 2, RGB(124, 252, 0));
 		CPen redPen(PS_SOLID, 2, RGB(255, 0, 0));
 		CPen whitePen(PS_SOLID, 2, RGB(255, 255, 255));
+
 		double Min_ClickE[2]; 
 		double Max_ClickE[2]; 
 		double Min_ClickN[2]; 
@@ -734,38 +674,74 @@ void CSPAProjectDoc::onClick(CPoint p, GETransform2D* pTransform, CDC* pDC)
 		Max_ClickN[0] = max(min_r.x,max_r.x); 
 		Min_ClickN[1] = min(min_r.y,max_r.y); 
 		Max_ClickN[1] = max(min_r.y,max_r.y); 
+
 		//Get Point
 		Long::Node n_Result = getClickedNode(pClick, pTransform, Min_ClickN, Max_ClickN);
 		if (n_Result.isNode())
 		{
-			MapEngine::GEPoint2D n_v;
-			pTransform->RP2VP(n_Result.lat, n_Result.lon, n_v);
-			drawNode(n_v.x, n_v.y, pDC, pTransform, &greenPen);
+			if (count_Click == 2)
+			{
+				count_Click = 0;
+				src_Node.setNull();
+				tar_Node.setNull();
+			}
+			if (count_Click == 0)
+			{
+				src_Node.copy(n_Result); 
+			}
+			if (count_Click == 1)
+			{
+				tar_Node.copy(n_Result); 
+			}
+			count_Click++; 
 		}
 		else
 		{
 			//Get Edge
 			MapEngine::GEPoint2D projection_R;
 			MapEngine::GEPoint2D projection_P;
-			Long::Node n_Projection; 
+			Long::Node n_Projection;
+			n_Projection.setNull(); 
 			Long::Edge e_Result = getClickedEdge(pClick, pTransform, Min_ClickE, Max_ClickE, projection_R,n_Projection);
+			if (e_Result.isEdge())
+			{
 				if (is_ClickOptions)
-			{
-				pTransform->RP2VP(projection_R.x, projection_R.y, projection_P);
-				drawNode(projection_P.x, projection_P.y, pDC, pTransform, &greenPen);
-			}
-			else
-			{
-				for (int i = 0; i < e_Result.Nodes.size(); i++)
 				{
-					MapEngine::GEPoint2D v_e_1;
-					MapEngine::GEPoint2D v_e_2;
-					pTransform->RP2VP(e_Result.Nodes[i].first->lat, e_Result.Nodes[i].first->lon, v_e_1);
-					pTransform->RP2VP(e_Result.Nodes[i].second->lat, e_Result.Nodes[i].second->lon, v_e_2);
-					drawEdge(v_e_1.x, v_e_1.y, v_e_2.x, v_e_2.y, pDC, pTransform, &greenPen);
+					/*pTransform->RP2VP(projection_R.x, projection_R.y, projection_P);*/
+					//drawNode(projection_P.x, projection_P.y, pDC, pTransform, &greenPen);
+					//Add node graph
+					/*graph.addNode(&n_Projection);
+					graph.v++; */
+					if (count_Click == 2)
+					{
+						count_Click = 0;
+						src_Node.setNull();
+						tar_Node.setNull();
+					}
+					if (count_Click == 0)
+					{
+						src_Node.copy(n_Projection);
+					}
+					if (count_Click == 1)
+					{
+						tar_Node.copy(n_Projection);
+					}
+					count_Click++;
+				}
+				else
+				{
+					for (int i = 0; i < e_Result.Nodes.size(); i++)
+					{
+						MapEngine::GEPoint2D v_e_1;
+						MapEngine::GEPoint2D v_e_2;
+						pTransform->RP2VP(e_Result.Nodes[i].first->lat, e_Result.Nodes[i].first->lon, v_e_1);
+						pTransform->RP2VP(e_Result.Nodes[i].second->lat, e_Result.Nodes[i].second->lon, v_e_2);
+						drawEdge(v_e_1.x, v_e_1.y, v_e_2.x, v_e_2.y, pDC, pTransform, &greenPen);
+					}
 				}
 			}
 		}
+
 		isClick = false;
 	}
 }
@@ -825,6 +801,9 @@ Long::Edge CSPAProjectDoc::getClickedEdge(CPoint p, GETransform2D* pTransform, d
 	Long::Edge e_Result; 
 	Long::Node n_Begin; 
 	Long::Node n_End; 
+	e_Result.setNull(); 
+	n_Begin.setNull(); 
+	n_End.setNull(); 
 	if (m_eRTData != NULL)
 	{
 		RTree<Long::Edge*, double, 2>::Iterator it_ec(Min_ClickE, Max_ClickE);
@@ -852,15 +831,17 @@ Long::Edge CSPAProjectDoc::getClickedEdge(CPoint p, GETransform2D* pTransform, d
 						projection_P = projection;
 					}
 				}
-				//drawEdge(v_e_1.x, v_e_1.y, v_e_2.x, v_e_2.y, pDC, pTransform, &greenPen);
 			}
 			m_eRTData->GetNext(it_ec);
 		}
 	}
 	//Create projection node
-	n_Projection.set(-1, projection_P.x, projection_P.y); 
-	n_Projection.addAdjacentNode(&n_Begin); 
-	n_Projection.addAdjacentNode(&n_End);
+	if (n_Begin.isNode() && n_End.isNode())
+	{
+		n_Projection.set(graph.max_ID + 1, projection_P.x, projection_P.y);
+		n_Projection.addAdjacentNode(&n_Begin);
+		n_Projection.addAdjacentNode(&n_End);
+	}
 
 	return e_Result; 
 }
@@ -893,6 +874,15 @@ Long::Node CSPAProjectDoc::getClickedNode(CPoint p, GETransform2D* pTransform, d
 		}
 	}
 	return n_Result; 
+}
+
+void CSPAProjectDoc::init()
+{
+	src_Node.setNull();
+	tar_Node.setNull();
+	old_Src_Id = -2; 
+	old_Tar_Id = -2; 
+	path = NULL; 
 }
 
 double CSPAProjectDoc::getDistanceHaversin(double startLat, double startLong, double endLat, double endLong)

@@ -9,7 +9,7 @@ namespace Long
 	public: 
 		Edge()
 		{
-			id = 0; 
+			id = -1; 
 			Nodes.clear(); 
 	/*		begin_Node = NULL; 
 			end_Node = NULL; */
@@ -20,7 +20,9 @@ namespace Long
 			Nodes = _edge.Nodes; 
 		}
 		void addEdge(Node* node_1, Node* node_2); 
-		void copy(Edge _e); 
+		void copy(Edge _e);
+		void setNull(); 
+		bool isEdge(); 
 	public: 
 		int id; 
 		std::vector<epair> Nodes; 

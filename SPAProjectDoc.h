@@ -50,17 +50,18 @@ public:
 	CTransformManager* m_pTransformManager;
 	Long::Graph graph; 
 	RTree<Long::Node*, double, 2>* m_pRTData; 
-	RTree<Long::Edge*, double, 2>* m_eRTData; 
-	bool CSPA_Flat = true; 
-	bool isDraw = false; 
+	RTree<Long::Edge*, double, 2>* m_eRTData;  
 	Long::Node src_Node; 
 	Long::Node tar_Node;
-	bool is_ClickOptions = false; 
+	int old_Src_Id; 
+	int old_Tar_Id; 
+	bool is_ClickOptions = true; 
 	epair edge_1;
 	epair edge_2; 
 	CPoint pClick;
 	bool isClick = false; 
 	int count_Click = 0; 
+	int* path; 
 public:
 	CString				 m_strDatabaseFile;
 	MapEngine::GERect2D* m_pExtents;
@@ -91,6 +92,7 @@ private:
 	Long::Edge getClickedEdge(CPoint p, GETransform2D* pTransform, double Min_ClickE[2], double Max_ClickE[2], MapEngine::GEPoint2D& projection_P, Long::Node& n_Projection);
 	Long::Node getClickedNode(CPoint p, GETransform2D* pTransform, double Min_ClickN[2], double Max_ClickN[2]); 
 	double getDistanceHaversin(double startLat, double startLong, double endLat, double endLong); 
+	void init(); 
 public:
 	BOOL ExecuteMouseWheel(CPoint p, UINT nFlags, short zDelta);
 

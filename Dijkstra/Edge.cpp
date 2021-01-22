@@ -13,4 +13,13 @@ namespace Long
 		id = _e.id; 
 		Nodes = _e.Nodes; 
 	}
+	void Edge::setNull()
+	{
+		id = -1; 
+		Nodes.clear(); 
+	}
+	bool Edge::isEdge()
+	{
+		return (id >= 0) && (Nodes.size() > 0); 
+	}
 }

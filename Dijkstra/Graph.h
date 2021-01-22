@@ -41,6 +41,7 @@ namespace Long
 		int e; 
 		int src; 
 		int target;
+		int max_ID; 
 		double top; 
 		double left; 
 		double right; 
