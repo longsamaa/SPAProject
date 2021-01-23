@@ -3,15 +3,17 @@
 
 namespace Long
 {
-	void Dijkstra_priority_queue::shortestPath(Long::Graph graph, int idSrcNode, int idTargetNode)
+	void Dijkstra_priority_queue::shortestPath(Long::Graph graph,Long::Node src_Node, Long::Node tar_Node)
 	{
 		int nodeNumber = graph.getNodeNumber();
 		std::priority_queue<ipair, std::vector<ipair>, std::greater<ipair>> pq;
 		std::map<int, double> dist;
-		int idMax = graph.getMaxNodeId() ;
-		parent = new int[nodeNumber];
+		int idMax = graph.getMaxNodeId();
+		int n = graph.v + 2; 
+		parent = new int[n];
 		std::map<int, Node> parents; 
 		std::bitset<100000> sptBitSet;
+		bool check = false; 
 	/*	boost::dynamic_bitset<> sptBitSet(idMax + 10); */
 
 		//Init dist
@@ -21,9 +23,39 @@ namespace Long
 			dist[id] = INF;
 			parent[i] = -1;
 		}
+		
+		if (src_Node.getId() >= graph.v)
+		{
+			parent[src_Node.id] = -1; 
+			double startLat = src_Node.lat;
+			double startLong = src_Node.lon;
+			sptBitSet[src_Node.id].flip(); 
+			for (int i = 0; i < src_Node.adjacentNodes.size(); i++)
+			{
+				int idNode = src_Node.adjacentNodes[i]->getId();
+				Node* node = graph.getNode(idNode);
+				double endLat = node->lat;
+				double endLong = node->lon;
+				double distance = getDistanceHaversin(startLat, startLong, endLat, endLong);
+				if (!sptBitSet[idNode] && (dist[idNode] > dist[src_Node.id] + distance))
+				{
+					parent[idNode] = src_Node.id;
+					dist[idNode] = dist[src_Node.id] + distance;
+					sptBitSet[idNode].flip();
+					pq.push(std::make_pair(dist[idNode], idNode));
+				}
+			}
+		}
+		else
+		{
+			dist[src_Node.getId()] = 0;
+			pq.push(std::make_pair(0, src_Node.getId()));
+		}
 
-		dist[idSrcNode] = 0;
-		pq.push(std::make_pair(0, idSrcNode));
+		if (!graph.isInGraph(tar_Node))
+		{
+			check = true; 
+		}
 
 		while (!pq.empty())
 		{
@@ -47,8 +79,15 @@ namespace Long
 					sptBitSet[idNode].flip(); 
 					pq.push(std::make_pair(dist[idNode], idNode));
 				}
-				if (idCurrentNode == idTargetNode)
-					break;			
+				if (!check)
+				{
+					if (idCurrentNode == tar_Node.getId())
+						break;
+				}
+				else
+				{
+
+				}
 			}
 		}
 		//printSolution(dist, idSrcNode, idTargetNode, parent);

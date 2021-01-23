@@ -92,4 +92,8 @@ namespace Long
 			}
 		}
 	}
+	bool Graph::isInGraph(Long::Node _node)
+	{
+		return (0 >= _node.id) && (_node.id < this->v); 
+	}
 }

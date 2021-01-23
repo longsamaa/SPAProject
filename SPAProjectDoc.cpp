@@ -352,6 +352,37 @@ void CSPAProjectDoc::Draw()
 			pTransform->RP2VP(tar_Node.lat, tar_Node.lon, vp); 
 			drawNode(vp.x, vp.y, pDC, pTransform, &greenPen);
 		}
+		//Find shorted_path
+		if (src_Node.isNode() && tar_Node.isNode())
+		{
+			if (src_Node.id != old_Src_Id && tar_Node.id != old_Tar_Id)
+			{
+				//On the same line
+				if (src_Node.compareAdjacentNodes(tar_Node))
+				{
+					MapEngine::GEPoint2D vp_1;
+					MapEngine::GEPoint2D vp_2;
+					pTransform->RP2VP(src_Node.lat, src_Node.lon, vp_1);
+					pTransform->RP2VP(tar_Node.lat, tar_Node.lon, vp_2);
+					drawEdge(vp_1.x, vp_1.y, vp_2.x, vp_2.y, pDC, pTransform, &greenPen);
+				}
+				else
+				{
+					//Dijkstra
+					Long::Dijkstra_priority_queue Dpq;
+					Dpq.shortestPath(graph, src_Node, tar_Node);
+					path = Dpq.getPath();
+					printPath(path, tar_Node.id, tar_Node.id, pDC, &greenPen, pTransform);
+					old_Src_Id = src_Node.id; 
+					old_Tar_Id = tar_Node.id; 
+				}
+			}
+			else
+			{
+				//Draw path 
+				printPath(path, tar_Node.id, tar_Node.id, pDC, &greenPen, pTransform);
+			}
+		}
 
 		//Find shorted_path
 		//if (src_Node.isNode() && tar_Node.isNode())
@@ -426,6 +457,7 @@ void CSPAProjectDoc::readGraph(LPCTSTR m_strDatabaseFile)
 	f >> e;
 	f >> src; 
 	f >> tar; 
+	tmp_ID = v; 
 	graph.setVE(v, e);
 	graph.src = src; 
 	graph.target = tar; 
@@ -526,9 +558,45 @@ void CSPAProjectDoc::drawEdge(int startX, int startY, int endX, int endY, CDC* p
 
 void CSPAProjectDoc::printPath(int* parent, int j, int tmp, CDC* pDC, CPen* Color, GETransform2D* pTransform)
 {
-	Long::Node* node1 = graph.getNode(tmp);
-	Long::Node* node2 = graph.getNode(j);
+	Long::Node* node2 = new Long::Node(); 
+	Long::Node* node1 = new Long::Node(); 
+	/*Long::Node* node1 = graph.getNode(tmp);
+	Long::Node* node2 = graph.getNode(j);*/
+	if (j == 375)
+	{
+		std::cout << "akjf";
+	}
+	if (j == src_Node.id)
+	{
+		node2->copy(src_Node); 
+	}
+	else
+	{
+		if (j == tar_Node.id)
+		{
+			node2->copy(tar_Node); 
+		}
+		else
+		{
+			node2 = graph.getNode(j);
+		}
+	}
 
+	if (tmp == src_Node.id)
+	{
+		node1->copy(src_Node);
+	}
+	else
+	{
+		if (tmp == tar_Node.id)
+		{
+			node1->copy(tar_Node);
+		}
+		else
+		{
+			node1 = graph.getNode(tmp);
+		}
+	}
 	MapEngine::GEPoint2D pStart(node1->lat, node1->lon);
 	MapEngine::GEPoint2D pEnd(node2->lat, node2->lon);
 
@@ -720,7 +788,7 @@ void CSPAProjectDoc::onClick(CPoint p, GETransform2D* pTransform, CDC* pDC)
 					}
 					if (count_Click == 0)
 					{
-						src_Node.copy(n_Projection);
+						src_Node.copy(n_Projection); 
 					}
 					if (count_Click == 1)
 					{
@@ -799,11 +867,11 @@ Long::Edge CSPAProjectDoc::getClickedEdge(CPoint p, GETransform2D* pTransform, d
 	MapEngine::GEPoint2D projection; 
 	pTransform->VP2RP(p.x, p.y, rp_Click);
 	Long::Edge e_Result; 
-	Long::Node n_Begin; 
-	Long::Node n_End; 
+	Long::Node* n_Begin = new Long::Node(); 
+	Long::Node* n_End = new Long::Node(); 
 	e_Result.setNull(); 
-	n_Begin.setNull(); 
-	n_End.setNull(); 
+	n_Begin->setNull(); 
+	n_End->setNull(); 
 	if (m_eRTData != NULL)
 	{
 		RTree<Long::Edge*, double, 2>::Iterator it_ec(Min_ClickE, Max_ClickE);
@@ -826,8 +894,8 @@ Long::Edge CSPAProjectDoc::getClickedEdge(CPoint p, GETransform2D* pTransform, d
 						Long::Edge tmp(*edge);
 						e_Result.copy(tmp);
 						min_E = dist_E;
-						n_Begin.copy_P(*edge->Nodes[i].first); 
-						n_End.copy_P(*edge->Nodes[i].second); 
+						n_Begin->copy_P(*edge->Nodes[i].first); 
+						n_End->copy_P(*edge->Nodes[i].second); 
 						projection_P = projection;
 					}
 				}
@@ -836,13 +904,17 @@ Long::Edge CSPAProjectDoc::getClickedEdge(CPoint p, GETransform2D* pTransform, d
 		}
 	}
 	//Create projection node
-	if (n_Begin.isNode() && n_End.isNode())
+	if (n_Begin->isNode() && n_End->isNode())
 	{
-		n_Projection.set(graph.max_ID + 1, projection_P.x, projection_P.y);
-		n_Projection.addAdjacentNode(&n_Begin);
-		n_Projection.addAdjacentNode(&n_End);
+		if(tmp_ID == graph.v + 1)
+		{ 
+			tmp_ID = graph.v; 
+			tmp_ID++; 
+		}
+		n_Projection.set(tmp_ID, projection_P.x, projection_P.y);
+		n_Projection.addAdjacentNode(n_Begin);
+		n_Projection.addAdjacentNode(n_End);
 	}
-
 	return e_Result; 
 }
 

@@ -62,6 +62,7 @@ public:
 	bool isClick = false; 
 	int count_Click = 0; 
 	int* path; 
+	int tmp_ID; 
 public:
 	CString				 m_strDatabaseFile;
 	MapEngine::GERect2D* m_pExtents;
@@ -91,7 +92,7 @@ private:
 	double calDistFromPointToTheEdge(MapEngine::GEPoint2D p_A, MapEngine::GEPoint2D p_B, MapEngine::GEPoint2D p_C, MapEngine::GEPoint2D &projection_P); 
 	Long::Edge getClickedEdge(CPoint p, GETransform2D* pTransform, double Min_ClickE[2], double Max_ClickE[2], MapEngine::GEPoint2D& projection_P, Long::Node& n_Projection);
 	Long::Node getClickedNode(CPoint p, GETransform2D* pTransform, double Min_ClickN[2], double Max_ClickN[2]); 
-	double getDistanceHaversin(double startLat, double startLong, double endLat, double endLong); 
+	double getDistanceHaversin(double startLat, double startLong, double endLat, double endLong);  
 	void init(); 
 public:
 	BOOL ExecuteMouseWheel(CPoint p, UINT nFlags, short zDelta);

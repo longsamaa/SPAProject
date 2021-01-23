@@ -10,7 +10,8 @@ namespace Long
 	class Dijkstra_priority_queue
 	{
 	public:
-		void shortestPath(Long::Graph graph, int idSrcNode, int idTargetNode);
+	/*	void shortestPath(Long::Graph graph, int idSrcNode, int idTargetNode);*/
+		void shortestPath(Long::Graph graph, Long::Node src_Node, Long::Node tar_Node);
 		int* getPath();
 	private:
 		void printSolution(std::map<int, double> dist, int idSrcNode, int idTargetNode, int* parent);

@@ -36,6 +36,7 @@ namespace Long
 		Node* getNode(int id);
 		int getMaxNodeId(); 
 		double getDistanceHaversin(double startLat, double startLong, double endLat, double endLong); 
+		bool isInGraph(Long::Node _node); 
 	public: 
 		int v; 
 		int e; 
